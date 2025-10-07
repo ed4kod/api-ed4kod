@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд - FastAPI{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Дашборд</li>
+{% endblock %}
+
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-speedometer2 text-primary me-2"></i>Дашборд
+    </h1>
+    <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Обновить
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stats-card users card-hover h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title text-muted mb-2">Пользователи</h6>
+                        <h2 class="mb-0" id="users-count">0</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-people-fill display-6 text-success"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="/users" class="btn btn-outline-success btn-sm">Управление</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card items card-hover h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title text-muted mb-2">Предметы</h6>
+                        <h2 class="mb-0" id="items-count">0</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-box-seam-fill display-6 text-warning"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="/items" class="btn btn-outline-warning btn-sm">Управление</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card card-hover h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title text-muted mb-2">Статус API</h6>
+                        <h4 class="mb-0" id="activity-status">Проверка...</h4>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-check-circle-fill display-6 text-primary"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span class="badge bg-secondary" id="api-status">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Log -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-check me-2"></i>Недавние действия
+                </h5>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearActivityLog()">
+                    <i class="bi bi-trash me-1"></i>Очистить
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="activity-log">
+                    <div class="list-group-item text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Загрузка...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const API_BASE = window.location.origin + '/api';
+    let activityLog = [];
+
+    function showMessage(message, type = 'success') {
+        const messageDiv = document.getElementById('message');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        messageDiv.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    // Простая функция для добавления действия в лог
+    function addActivity(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString('ru-RU');
+        const activity = {
+            message: message,
+            type: type,
+            timestamp: timestamp
+        };
+
+        activityLog.unshift(activity); // Добавляем в начало
+
+        // Ограничиваем до 10 последних записей
+        if (activityLog.length > 10) {
+            activityLog = activityLog.slice(0, 10);
+        }
+
+        renderActivityLog();
+    }
+
+    // Функция отрисовки лога
+    function renderActivityLog() {
+        const logContainer = document.getElementById('activity-log');
+
+        if (activityLog.length === 0) {
+            logContainer.innerHTML = `
+                <div class="list-group-item text-center text-muted py-4">
+                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                    Нет действий
+                </div>
+            `;
+            return;
+        }
+
+        logContainer.innerHTML = activityLog.map(activity => {
+            const iconClass = {
+                'info': 'bi-info-circle text-primary',
+                'success': 'bi-check-circle text-success',
+                'error': 'bi-x-circle text-danger',
+                'warning': 'bi-exclamation-circle text-warning'
+            }[activity.type] || 'bi-info-circle text-primary';
+
+            return `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi ${iconClass} me-2"></i>
+                            <span>${activity.message}</span>
+                        </div>
+                        <small class="text-muted">${activity.timestamp}</small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Очистка лога
+    function clearActivityLog() {
+        activityLog = [];
+        renderActivityLog();
+        showMessage('Лог очищен');
+    }
+
+    async function refreshDashboard() {
+        await loadStats();
+        addActivity('Данные дашборда обновлены', 'info');
+        showMessage('Данные обновлены');
+    }
+
+    async function loadStats() {
+        try {
+            const usersResponse = await fetch(`${API_BASE}/users/`);
+            const itemsResponse = await fetch(`${API_BASE}/items/`);
+
+            if (usersResponse.ok && itemsResponse.ok) {
+                const users = await usersResponse.json();
+                const items = await itemsResponse.json();
+
+                document.getElementById('users-count').textContent = users.length;
+                document.getElementById('items-count').textContent = items.length;
+                document.getElementById('activity-status').textContent = 'Онлайн';
+                document.getElementById('api-status').className = 'badge bg-success';
+                document.getElementById('api-status').textContent = 'API доступен';
+
+                // Добавляем в лог информацию о загрузке
+                addActivity(`Загружено ${users.length} пользователей и ${items.length} предметов`, 'success');
+            }
+        } catch (error) {
+            document.getElementById('activity-status').textContent = 'Офлайн';
+            document.getElementById('api-status').className = 'badge bg-danger';
+            document.getElementById('api-status').textContent = 'API недоступен';
+            document.getElementById('users-count').textContent = '?';
+            document.getElementById('items-count').textContent = '?';
+
+            addActivity('Ошибка загрузки данных', 'error');
+        }
+    }
+
+    // Имитация случайных действий для демонстрации
+    function simulateRandomActivity() {
+        const actions = [
+            {message: 'Новый пользователь зарегистрирован', type: 'success'},
+            {message: 'Предмет добавлен в каталог', type: 'success'},
+            {message: 'Данные синхронизированы', type: 'info'},
+            {message: 'Резервное копирование выполнено', type: 'info'}
+        ];
+
+        const randomAction = actions[Math.floor(Math.random() * actions.length)];
+        addActivity(randomAction.message, randomAction.type);
+    }
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function () {
+        // Добавляем первое действие
+        addActivity('Дашборд загружен', 'info');
+
+        // Загружаем данные
+        refreshDashboard();
+
+        // Для демонстрации - добавляем случайные действия каждые 30 секунд
+        setInterval(simulateRandomActivity, 30000);
+    });
+
+    // Делаем функции доступными глобально для использования в других скриптах
+    window.addActivity = addActivity;
+</script>
+{% endblock %}

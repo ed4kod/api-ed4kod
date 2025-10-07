@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Предметы - FastAPI{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/items">Предметы</a></li>
+<li class="breadcrumb-item active" aria-current="page">Управление</li>
+{% endblock %}
+
+{% block page_title %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-box-seam-fill text-warning me-2"></i>Предметы
+    </h1>
+    <div>
+        <button class="btn btn-outline-warning btn-sm me-2" onclick="loadItems()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Обновить
+        </button>
+        <span class="badge bg-secondary" id="items-count">0 предметов</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Item Form -->
+<div class="card mb-4" id="item-form-section">
+    <div class="card-header">
+        <h5 class="card-title mb-0" id="item-form-title">
+            <i class="bi bi-plus-square me-2"></i>Добавить предмет
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="item-form">
+            <input type="hidden" id="item-id">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="title" class="form-label">Название</label>
+                    <input type="text" class="form-control" id="title" required>
+                </div>
+                <div class="col-12">
+                    <label for="description" class="form-label">Описание</label>
+                    <textarea class="form-control" id="description" rows="3"></textarea>
+                </div>
+                <div class="col-12">
+                    <label for="owner-select" class="form-label">Владелец</label>
+                    <select class="form-select" id="owner-select" required>
+                        <option value="">-- Выберите пользователя --</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning" id="item-submit-btn">
+                            <i class="bi bi-plus-circle me-1"></i>Добавить
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="item-cancel-btn"
+                                style="display: none;">
+                            <i class="bi bi-x-circle me-1"></i>Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Items Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-list-ul me-2"></i>Список предметов
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Владелец</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="items-tbody">
+                <tr>
+                    <td colspan="5" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/items.js"></script>
+{% endblock %}
