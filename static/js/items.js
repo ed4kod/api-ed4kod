@@ -86,7 +86,7 @@ async function apiCall(url, options = {}) {
     }
 }
 
-// Initialize items page
+// Initialize users page
 document.addEventListener('DOMContentLoaded', function () {
     initItemsPage();
 });
@@ -127,7 +127,7 @@ async function loadUsersForItems() {
         usersCache = await response.json();
         updateOwnerSelect();
     } catch (error) {
-        console.error('Error loading users for items:', error);
+        console.error('Error loading users for users:', error);
         showMessage('Ошибка загрузки списка пользователей', 'error');
     }
 }
@@ -176,7 +176,7 @@ async function loadItems() {
 }
 
 function renderItems() {
-    const tbody = document.getElementById('items-tbody');
+    const tbody = document.getElementById('users-tbody');
 
     if (itemsCache.length === 0) {
         tbody.innerHTML = `
@@ -222,7 +222,7 @@ function renderItems() {
 }
 
 function updateItemsCount() {
-    const countElement = document.getElementById('items-count');
+    const countElement = document.getElementById('users-count');
     if (countElement) {
         countElement.textContent = `${itemsCache.length} предметов`;
     }

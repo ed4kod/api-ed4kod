@@ -28,7 +28,7 @@ async def read_users_page(request: Request):
 @pages_router.get("/items", response_class=HTMLResponse)
 async def read_items_page(request: Request):
     from main import templates
-    return templates.TemplateResponse("items.html", {"request": request})
+    return templates.TemplateResponse("users.html", {"request": request})
 
 
 @pages_router.get("/ui", response_class=HTMLResponse)
